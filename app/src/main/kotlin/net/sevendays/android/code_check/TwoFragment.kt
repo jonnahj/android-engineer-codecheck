@@ -9,7 +9,6 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import coil.load
-import net.sevendays.android.code_check.R
 import net.sevendays.android.code_check.TopActivity.Companion.lastSearchDate
 import net.sevendays.android.code_check.databinding.FragmentTwoBinding
 
