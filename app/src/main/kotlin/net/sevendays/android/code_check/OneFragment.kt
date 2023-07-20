@@ -4,15 +4,26 @@
 package net.sevendays.android.code_check
 
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import net.sevendays.android.code_check.databinding.FragmentOneBinding
+
 
 class OneFragment: Fragment(R.layout.fragment_one){
 
@@ -20,13 +31,18 @@ class OneFragment: Fragment(R.layout.fragment_one){
     {
         super.onViewCreated(view, savedInstanceState)
 
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder(StrictMode.getVmPolicy())
+                .detectLeakedClosableObjects()
+                .build()
+        )
+
         val _binding= FragmentOneBinding.bind(view)
 
-        val _viewModel= OneViewModel(requireActivity())
+        val _viewModel= OneViewModel()
 
         val _layoutManager= LinearLayoutManager(requireActivity())
-        val _dividerItemDecoration=
-            DividerItemDecoration(requireActivity(), _layoutManager.orientation)
+        val _dividerItemDecoration= DividerItemDecoration(requireActivity(), _layoutManager.orientation)
         val _adapter= CustomAdapter(object : CustomAdapter.OnItemClickListener {
             override fun itemClick(item: item){
                 gotoRepositoryFragment(item)
@@ -46,6 +62,25 @@ class OneFragment: Fragment(R.layout.fragment_one){
                 return@setOnEditorActionListener false
             }
 
+        _binding.searchInputText.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                println("The input is: " + s)
+                s.toString().let {
+                    _viewModel.searchResults(it).apply {
+                        _adapter.submitList(this)
+                    }
+                }
+            }
+        })
+
         _binding.recyclerView.also{
             it.layoutManager= _layoutManager
             it.addItemDecoration(_dividerItemDecoration)
@@ -55,8 +90,7 @@ class OneFragment: Fragment(R.layout.fragment_one){
 
     fun gotoRepositoryFragment(item: item)
     {
-        val _action= OneFragmentDirections
-            .actionRepositoriesFragmentToRepositoryFragment(item= item)
+        val _action= OneFragmentDirections.actionRepositoriesFragmentToRepositoryFragment(item= item)
         findNavController().navigate(_action)
     }
 }

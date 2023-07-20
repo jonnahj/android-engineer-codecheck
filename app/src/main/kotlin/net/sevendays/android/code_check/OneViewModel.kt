@@ -3,7 +3,6 @@
  */
 package net.sevendays.android.code_check
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import io.ktor.client.*
@@ -11,6 +10,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.DelicateCoroutinesApi
 import net.sevendays.android.code_check.R
 import net.sevendays.android.code_check.TopActivity.Companion.lastSearchDate
 import kotlinx.coroutines.GlobalScope
@@ -24,10 +24,7 @@ import java.util.*
 /**
  * Use with TwoFragment
  */
-class OneViewModel(
-    val context: Context
-) : ViewModel() {
-
+class OneViewModel : ViewModel() {
     // Search results
     fun searchResults(inputText: String): List<item> = runBlocking {
         val client = HttpClient(Android)
@@ -35,7 +32,7 @@ class OneViewModel(
         try {
             x = GlobalScope.async {
                 val response: HttpResponse =
-                    client?.get("https://api.github.com/search/repositories") {
+                    client.get("https://api.github.com/search/repositories") {
                         header("Accept", "application/vnd.github.v3+json")
                         parameter("q", inputText)
                     }
@@ -64,7 +61,8 @@ class OneViewModel(
                         item(
                             name = name,
                             ownerIconUrl = ownerIconUrl,
-                            language = context.getString(R.string.written_language, language),
+//                            language = context.getString(R.string.written_language, language),
+                            language = "Written in $language",
                             stargazersCount = stargazersCount,
                             watchersCount = watchersCount,
                             forksCount = forksCount,
